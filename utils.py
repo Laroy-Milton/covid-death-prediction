@@ -213,13 +213,14 @@ def extractAllData():
 
 # Uses GridhSearch to find the best parameters then plots the learning curve
 def bestModel(model, model_name, params, X, y, cv=None):
-    print('Training ' + model_name + '...')
+    print('\nTraining ' + model_name + '...')
 
     gs = GridSearchCV(model, params, cv=cv, scoring='r2', return_train_score=True)
     gs.fit(X, y)
 
     title = '{} {:.2}'.format(model_name, gs.best_score_)
     print(title)
+    print()
     plot = plot_learning_curve(gs.best_estimator_, title, X, y)
     plot.show()
 

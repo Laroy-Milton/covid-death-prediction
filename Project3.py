@@ -1,4 +1,5 @@
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.linear_model import Ridge
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.tree import DecisionTreeRegressor
@@ -17,7 +18,7 @@ def main():
                       'bootstrap': [True, False],
                       'n_jobs': [-1]}
 
-    ridge_parameters = {'alpha': np.linspace(0.0, 1.0, num=30),
+    ridge_parameters = {'alpha': [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0],
                         'solver': ['auto', 'svd', 'cholesky', 'lsqr', 'sparse_cg', 'sag', 'saga'],
                         'max_iter': [1000, 10000, 50000]}
 
@@ -33,6 +34,9 @@ def main():
                       'max_depth': np.arange(1, 10),
                       'min_samples_split': np.arange(2, 10),
                       'min_samples_leaf': np.arange(1, 5)}
+
+    GPR_parameters = {'alpha': [0.0001, 0.001, 0.01, 0.1, 1.0, 10.0],
+                      'n_restarts_optimizer': np.arange(0, 5)}
 
     # ---------------------------------------------------------
     # Random Forest Regression
@@ -52,24 +56,24 @@ def main():
     # ---------------------------------------------------------
     # Ridge Regression ALL
     model_name = 'Ridge Regression ALL'
-    model = Ridge()
+    model = Ridge(normalize=True)
     X, y = extractAllData()
     bestModel(model, model_name, ridge_parameters, X, y, cv)
 
     # ---------------------------------------------------------
     # Ridge regression Top 10 Feature importance
     model_name = 'Ridge Regression Top 10'
-    model = Ridge()
+    model = Ridge(normalize=True)
     X, y = extractAllData()
     X = X[feature_imp[:10].index]
     bestModel(model, model_name, ridge_parameters, X, y, cv)
 
     # ---------------------------------------------------------
-    # KNN
-    model_name = 'KNN All'
-    model = KNeighborsRegressor()
-    X, y = extractAllData()
-    bestModel(model, model_name, KNN_parameters, X, y, cv)
+    # # KNN
+    # model_name = 'KNN All'
+    # model = KNeighborsRegressor()
+    # X, y = extractAllData()
+    # bestModel(model, model_name, KNN_parameters, X, y)
 
     # ---------------------------------------------------------
     # Decision tree Regression All
@@ -77,6 +81,43 @@ def main():
     model = DecisionTreeRegressor()
     X, y = extractAllData()
     bestModel(model, model_name, DTR_parameters, X, y, cv)
+
+    # ---------------------------------------------------------
+    # Decision tree Regression Specific
+    model_name = 'Decision Tree Regressor Specific'
+    model = DecisionTreeRegressor()
+    X, y = extractData()
+    bestModel(model, model_name, DTR_parameters, X, y, cv)
+
+    # ---------------------------------------------------------
+    # Decision tree Regression Top 10 Feature importance
+    model_name = 'Decision Tree Regressor Top 10'
+    model = DecisionTreeRegressor()
+    X, y = extractAllData()
+    X = X[feature_imp[:10].index]
+    bestModel(model, model_name, DTR_parameters, X, y, cv)
+
+    # ---------------------------------------------------------
+    # Gaussian Process Regressor All
+    model_name = 'Gaussian Process Regressor All'
+    model = GaussianProcessRegressor()
+    X, y = extractAllData()
+    bestModel(model, model_name, GPR_parameters, X, y, cv)
+
+    # ---------------------------------------------------------
+    # Gaussian Process Regressor Specific
+    model_name = 'Gaussian Process Regressor Specific'
+    model = GaussianProcessRegressor()
+    X, y = extractData()
+    bestModel(model, model_name, GPR_parameters, X, y, cv)
+
+    # ---------------------------------------------------------
+    # Gaussian Process Regressor Specific
+    model_name = 'Gaussian Process Regressor Specific'
+    model = GaussianProcessRegressor()
+    X, y = extractAllData()
+    X = X[feature_imp[:10].index]
+    bestModel(model, model_name, GPR_parameters, X, y, cv)
 
 
 main()

@@ -220,7 +220,8 @@ def bestModel(model, model_name, params, X, y, cv=None):
 
     title = '{} {:.2}'.format(model_name, gs.best_score_)
     print(title)
-    plot_learning_curve(gs.best_estimator_, title, X, y)
+    plot = plot_learning_curve(gs.best_estimator_, title, X, y)
+    plot.show()
 
     return gs
 

@@ -2,7 +2,14 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.gaussian_process import GaussianProcessRegressor
 from sklearn.linear_model import Ridge
 from sklearn.neighbors import KNeighborsRegressor
+
 from sklearn.tree import DecisionTreeRegressor
+
+from sklearn.preprocessing import PowerTransformer
+from sklearn.preprocessing import QuantileTransformer
+from sklearn.preprocessing import normalize
+from sklearn.preprocessing import Normalizer
+from sklearn.preprocessing import FunctionTransformer
 
 from utils import *
 
@@ -39,31 +46,79 @@ def main():
                       'n_restarts_optimizer': np.arange(0, 5)}
 
     # ---------------------------------------------------------
+    # Data Vis
+    X, y = extractAllData()
+
+    bc = PowerTransformer(method='box-cox', standardize=True)
+    yj = PowerTransformer(method='yeo-johnson', standardize=True)
+    qt = QuantileTransformer(n_quantiles=len(X.index), output_distribution='normal') # prone to over fitting
+    scaler = StandardScaler()
+    transformer = FunctionTransformer(np.log1p)
+    Xtrans = Normalizer(norm='max').fit(X)
+
+
+    plt.hist(X)
+    plt.title('No normalization')
+    plt.show()
+
+
+    Xsc = scaler.fit_transform(X)
+    plt.hist(Xsc)
+    plt.title('Standard Scaler')
+    plt.show()
+
+
+    Xsc = scaler.fit_transform(Xtrans.transform(X))
+    plt.hist(Xsc)
+    plt.title('Standard Scaler, normnalized')
+    plt.show()
+
+
+
+    # Xbc = bc.fit_transform(X)
+    # plt.hist(Xbc)
+    # plt.title('box-cox')
+    # plt.show()
+
+    Xyj = yj.fit_transform(X)
+    plt.title('yeo-johnson')
+    plt.hist(Xyj)
+    plt.show()
+
+    Xqt = qt.fit_transform(X)
+    plt.hist(Xqt)
+    plt.title('Quantile')
+    plt.show()
+
+
+    # ---------------------------------------------------------
     # Random Forest Regression
     model_name = 'Random Forest Regression All'
     model = RandomForestRegressor()
+
     X, y = extractAllData()
+
     bm = bestModel(model, model_name, RFR_parameters, X, np.ravel(y), cv)
     feature_imp = topFeatures(bm, (X, y), num_features=10)
 
     # ---------------------------------------------------------
     # Ridge regression Specific
     model_name = 'Ridge regression Specific'
-    model = Ridge(normalize=True)
+    model = Ridge()
     X, y = extractData()
     bestModel(model, model_name, ridge_parameters, X, y, cv)
 
     # ---------------------------------------------------------
     # Ridge Regression ALL
     model_name = 'Ridge Regression ALL'
-    model = Ridge(normalize=True)
+    model = Ridge()
     X, y = extractAllData()
     bestModel(model, model_name, ridge_parameters, X, y, cv)
 
     # ---------------------------------------------------------
     # Ridge regression Top 10 Feature importance
     model_name = 'Ridge Regression Top 10'
-    model = Ridge(normalize=True)
+    model = Ridge()
     X, y = extractAllData()
     X = X[feature_imp[:10].index]
     bestModel(model, model_name, ridge_parameters, X, y, cv)

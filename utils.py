@@ -6,8 +6,10 @@ import seaborn as sn
 from functools import reduce
 
 from sklearn import metrics
-from sklearn.model_selection import learning_curve
+from sklearn.model_selection import learning_curve, train_test_split
 from sklearn.model_selection import GridSearchCV
+from sklearn.preprocessing import PowerTransformer, QuantileTransformer
+from sklearn.preprocessing import StandardScaler
 
 
 # TODO throw away
@@ -215,6 +217,12 @@ def extractAllData():
 def bestModel(model, model_name, params, X, y, cv=None):
     print('\nTraining ' + model_name + '...')
 
+    # yj = PowerTransformer(method='yeo-johnson', standardize=True)
+    # X = yj.fit_transform(X)
+
+    qt = QuantileTransformer(n_quantiles=len(X.index), output_distribution='normal')
+    X = qt.fit_transform(X)
+
     gs = GridSearchCV(model, params, cv=cv, scoring='r2', return_train_score=True)
     gs.fit(X, y)
 
@@ -241,3 +249,4 @@ def topFeatures(model, data, num_features=10):
     print()
     plt.show()
     return feature_imp
+

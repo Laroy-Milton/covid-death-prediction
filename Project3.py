@@ -6,32 +6,32 @@ import seaborn as sn
 from functools import reduce
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import r2_score
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import RandomizedSearchCV, ShuffleSplit, train_test_split
 from sklearn import metrics
 from sklearn.model_selection import learning_curve
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.preprocessing import Normalizer, MinMaxScaler
-
-
+from sklearn.tree import DecisionTreeRegressor
 
 from utils import *
 
 
-
-
 def main():
+    np.random.seed(32455)
+    cv = 5  # k fold
+
     RFR_parameters = {'n_estimators': np.arange(2, 5),
-                     'criterion': ['mse', 'mae'],
-                     'min_samples_split': np.linspace(0.1, 1, num=10),
-                     'max_features': ['auto', 'sqrt', 'log2'],
-                     'bootstrap': [True, False],
-                     'n_jobs': [-1]}
+                      'criterion': ['mse', 'mae'],
+                      'min_samples_split': np.linspace(0.1, 1, num=10),
+                      'max_features': ['auto', 'sqrt', 'log2'],
+                      'bootstrap': [True, False],
+                      'n_jobs': [-1]}
 
     ridge_parameters = {'alpha': np.linspace(0.0, 1.0, num=30),
                         'solver': ['auto', 'svd', 'cholesky', 'lsqr', 'sparse_cg', 'sag', 'saga'],
-                        'max_iter': [500, 1000, 10000]}
+                        'max_iter': [1000, 10000, 50000]}
 
     KNN_parameters = {'n_neighbors': [30],  # np.arange(2,10),
                       'weights': ['uniform', 'distance'],
@@ -40,109 +40,119 @@ def main():
                       'p': [1, 2],
                       'n_jobs': [-1]}
 
-
+    # ---------------------------------------------------------
+    # Random Forest Regression
+    model_name = 'Random Forest Regression All'
+    print('Training ' + model_name + '...')
 
     X, y = extractAllData()
 
-    XTrain, XTest, yTrain, yTest = train_test_split(X, y, test_size=0.3)
-
-
     RFR = RandomForestRegressor()
-    gs = GridSearchCV(RFR, RFR_parameters, return_train_score=True)
-    gs.fit(XTrain, np.ravel(yTrain))
-    #plotLearningCurve(gs, 'Random Forest Regression')
 
+    gs = GridSearchCV(RFR, RFR_parameters, cv=cv, scoring='r2', return_train_score=True)
+    gs.fit(X, np.ravel(y))
 
-    feature_imp =pd.Series(gs.best_estimator_.feature_importances_, index=list(XTrain)).sort_values(ascending=False)
+    feature_imp = pd.Series(gs.best_estimator_.feature_importances_, index=list(X)).sort_values(ascending=False)
     sn.barplot(x=feature_imp[:10], y=feature_imp[:10].index)
     plt.title('Top 10 important features')
     plt.tight_layout()
-    # print("Top 10 features")
-    # print(feature_imp[:10])
-
+    print("Top 10 features:")
+    print(feature_imp[:10])
     plt.show()
 
+    title = '{} {:.2}'.format(model_name, gs.best_score_)
+    print(title)
+    plot_learning_curve(gs.best_estimator_, title, X, y, axes=None, ylim=None, cv=None,
+                        n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5))
 
-    print("Random Forest ALL score")
-    print(gs.score(XTest, np.ravel(yTest)))
+    # ---------------------------------------------------------
+    # Ridge regression Specific
+    model_name = 'Ridge regression Specific'
+    print('Training ' + model_name + '...')
 
-
-    #not all
     X, y = extractData()
-
-    XTrain, XTest, yTrain, yTest = train_test_split(X, y, test_size=0.3)
-
 
     reg = Ridge(normalize=True)
 
-    gs = GridSearchCV(reg, ridge_parameters, return_train_score=True)
-    gs.fit(XTrain, yTrain)
-    # p = gs.predict(XTest)
+    gs = GridSearchCV(reg, ridge_parameters, cv=cv, scoring='r2', return_train_score=True)
+    gs.fit(X, y)
+
     plotLearningCurve(gs, 'Ridge regression Specifc')
 
+    title = '{} {:.2}'.format(model_name, gs.best_score_)
+    print(title)
+    plot_learning_curve(gs.best_estimator_, title, X, y, axes=None, ylim=None, cv=None,
+                        n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5))
 
-    print("Ridge handpicked score")
-    print(gs.score(XTest, yTest))
+    # ---------------------------------------------------------
+    # Ridge Regression ALL
+    model_name = 'Ridge Regression ALL'
+    print('Training ' + model_name + '...')
 
-
-
-    # all data
     X, y = extractAllData()
-
-    XTrain, XTest, yTrain, yTest = train_test_split(X, y, test_size=0.3)
-
 
     reg = Ridge()
 
-    gs = GridSearchCV(reg, ridge_parameters, return_train_score=True)
-    gs.fit(XTrain, yTrain)
+    gs = GridSearchCV(reg, ridge_parameters, cv=cv, scoring='r2', return_train_score=True)
+    gs.fit(X, y)
 
-    plotLearningCurve(gs, 'Ridge regression ALL')
+    title = '{} {:.2}'.format(model_name, gs.best_score_)
+    print(title)
+    plot_learning_curve(gs.best_estimator_, title, X, y, axes=None, ylim=None, cv=None,
+                        n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5))
 
-    print("Ridge Regression ALL score")
-    print(gs.score(XTest, yTest))
+    # ---------------------------------------------------------
+    # Ridge regression Top 10 Feature importance
+    model_name = 'Ridge Regression Top 10'
+    print('Training ' + model_name + '...')
 
-
-
-
-    # with new features
     X, y = extractAllData()
     X = X[feature_imp[:10].index]
 
-    XTrain, XTest, yTrain, yTest = train_test_split(X, y, test_size=0.3)
-
     reg = Ridge()
 
-    gs = GridSearchCV(reg, ridge_parameters, return_train_score=True)
-    gs.fit(XTrain, yTrain)
-    # p = gs.predict(XTest)
-    plotLearningCurve(gs, 'Ridge regression Top 10 Feature importance')
+    gs = GridSearchCV(reg, ridge_parameters, cv=cv, scoring='r2', return_train_score=True)
+    gs.fit(X, y)
 
-    print("Ridge Regression Top 10 Important Features score")
-    print(gs.score(XTest, yTest))
+    title = '{} {:.2}'.format(model_name, gs.best_score_)
+    print(title)
+    plot_learning_curve(gs.best_estimator_, title, X, y, axes=None, ylim=None, cv=None,
+                        n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5))
 
-
-
-    #KNN
+    # ---------------------------------------------------------
+    # KNN
+    model_name = 'KNN All'
+    print('Training ' + model_name + '...')
     X, y = extractAllData()
-
-    XTrain, XTest, yTrain, yTest = train_test_split(X, y, test_size=0.3, random_state=10)
-
 
     knn = KNeighborsRegressor()
 
-    gs = GridSearchCV(knn, KNN_parameters, return_train_score=True)
-    gs.fit(XTrain, yTrain)
-    # p = gs.predict(XTest)
-    plotLearningCurve(gs, 'KNN Feature All')
+    gs = GridSearchCV(knn, KNN_parameters, scoring='r2', return_train_score=True)
+    gs.fit(X, y)
 
-    pred = gs.predict(XTest)
-    print("KNN All: score")
-    print(gs.score(XTest, yTest))
+    title = '{} {:.2}'.format(model_name, gs.best_score_)
+    print(title)
+    title = '{} {:.2}'.format(model_name, gs.best_score_)
+    plot_learning_curve(gs.best_estimator_, title, X, y, axes=None, ylim=None, cv=None,
+                        n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5))
 
+    # ---------------------------------------------------------
+    # Decision tree Regression All
+    model_name = 'Decision Tree Regressor All'
+    print('Training ' + model_name + '...')
+    X, y = extractAllData()
+    DTR_parameters = {'splitter': ('best', 'random'),
+                      'max_depth': np.arange(1, 10),
+                      'min_samples_split': np.arange(2, 10),
+                      'min_samples_leaf': np.arange(1, 5)}
 
+    gs = GridSearchCV(DecisionTreeRegressor(), DTR_parameters, cv=cv, scoring='r2', return_train_score=True)
+    gs.fit(X, y)
+
+    title = '{} {:.2}'.format(model_name, gs.best_score_)
+    print(title)
+    plot_learning_curve(gs.best_estimator_, title, X, y, axes=None, ylim=None, cv=None,
+                        n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5))
 
 
 main()
-
-

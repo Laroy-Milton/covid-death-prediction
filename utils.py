@@ -4,13 +4,13 @@ import matplotlib.pyplot as plt
 import seaborn as sn
 
 from functools import reduce
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.model_selection import RandomizedSearchCV, ShuffleSplit, train_test_split
+
 from sklearn import metrics
 from sklearn.model_selection import learning_curve
-from sklearn.preprocessing import Normalizer, MinMaxScaler
+from sklearn.model_selection import GridSearchCV
 
-# USING THIS ONE
+
+# TODO throw away
 def plotLearningCurve(gs, title):
     test_scores = gs.cv_results_['mean_test_score']
     train_scores = gs.cv_results_['mean_train_score']
@@ -21,6 +21,8 @@ def plotLearningCurve(gs, title):
     plt.title(title)
     plt.show()
 
+
+# TODO throw away
 def plot_learning_curves(model, X_train, y_train, X_val, y_val, title):
   train_errors, val_errors = [], []
   for m in range(5, len(X_train)):
@@ -36,6 +38,8 @@ def plot_learning_curves(model, X_train, y_train, X_val, y_val, title):
   plt.legend()
   plt.title(title)
 
+
+# Source https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
 def plot_learning_curve(estimator, title, X, y, axes=None, ylim=None, cv=None,
                       n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
   """
@@ -206,6 +210,18 @@ def extractAllData():
     X.to_csv("X.csv")
     y.to_csv("y.csv")
     return X, y
+
+
+def trainModel(model, model_name, params, data):
+    print('Training ' + model_name + '...')
+    X, y = data
+
+    gs = GridSearchCV(model, params, cv=cv, scoring='r2', return_train_score=True)
+    gs.fit(X, y)
+
+    title = '{} {:.2}'.format(model_name, gs.best_score_)
+    print(title)
+    plot_learning_curve(gs.best_estimator_, title, X, y)
 
 
 

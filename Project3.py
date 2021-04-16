@@ -3,25 +3,21 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sn
 
-from functools import reduce
+
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
-from sklearn.metrics import r2_score
-from sklearn.model_selection import GridSearchCV
-from sklearn.model_selection import RandomizedSearchCV, ShuffleSplit, train_test_split
-from sklearn import metrics
-from sklearn.model_selection import learning_curve
+
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.preprocessing import Normalizer, MinMaxScaler
 from sklearn.tree import DecisionTreeRegressor
 
 from utils import *
 
+np.random.seed(32455)
+cv = 5  # k fold
+
 
 def main():
-    np.random.seed(32455)
-    cv = 5  # k fold
-
     RFR_parameters = {'n_estimators': np.arange(2, 5),
                       'criterion': ['mse', 'mae'],
                       'min_samples_split': np.linspace(0.1, 1, num=10),
@@ -39,6 +35,11 @@ def main():
                       'leaf_size': np.arange(2, 30),
                       'p': [1, 2],
                       'n_jobs': [-1]}
+
+    DTR_parameters = {'splitter': ('best', 'random'),
+                      'max_depth': np.arange(1, 10),
+                      'min_samples_split': np.arange(2, 10),
+                      'min_samples_leaf': np.arange(1, 5)}
 
     # ---------------------------------------------------------
     # Random Forest Regression
@@ -140,11 +141,8 @@ def main():
     # Decision tree Regression All
     model_name = 'Decision Tree Regressor All'
     print('Training ' + model_name + '...')
-    X, y = extractAllData()
-    DTR_parameters = {'splitter': ('best', 'random'),
-                      'max_depth': np.arange(1, 10),
-                      'min_samples_split': np.arange(2, 10),
-                      'min_samples_leaf': np.arange(1, 5)}
+
+
 
     gs = GridSearchCV(DecisionTreeRegressor(), DTR_parameters, cv=cv, scoring='r2', return_train_score=True)
     gs.fit(X, y)
@@ -153,6 +151,20 @@ def main():
     print(title)
     plot_learning_curve(gs.best_estimator_, title, X, y, axes=None, ylim=None, cv=None,
                         n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5))
+    model = DecisionTreeRegressor()
+    data = extractAllData()
+    trainModel(model, model_name, DTR_parameters, data)
 
+
+def trainModel(model, model_name, params, data):
+    print('Training ' + model_name + '...')
+    X, y = data
+
+    gs = GridSearchCV(model, params, cv=cv, scoring='r2', return_train_score=True)
+    gs.fit(X, y)
+
+    title = '{} {:.2}'.format(model_name, gs.best_score_)
+    print(title)
+    plot_learning_curve(gs.best_estimator_, title, X, y)
 
 main()

@@ -24,25 +24,25 @@ def plotLearningCurve(gs, title):
 
 # TODO throw away
 def plot_learning_curves(model, X_train, y_train, X_val, y_val, title):
-  train_errors, val_errors = [], []
-  for m in range(5, len(X_train)):
-    model.fit(X_train[:m], np.ravel(y_train[:m]))
-    y_train_predict = model.predict(X_train[:m])
-    y_val_predict = model.predict(X_val)
-    train_errors.append(metrics.mean_squared_error(y_train[:m], y_train_predict))
-    val_errors.append(metrics.mean_squared_error(y_val, y_val_predict))
-  plt.plot(np.sqrt(train_errors), "r-+", linewidth=2, label='train')
-  plt.plot(np.sqrt(val_errors), "b-", linewidth=3, label='val')
-  plt.xlabel('Training set size')
-  plt.ylabel('RMSE')
-  plt.legend()
-  plt.title(title)
+    train_errors, val_errors = [], []
+    for m in range(5, len(X_train)):
+        model.fit(X_train[:m], np.ravel(y_train[:m]))
+        y_train_predict = model.predict(X_train[:m])
+        y_val_predict = model.predict(X_val)
+        train_errors.append(metrics.mean_squared_error(y_train[:m], y_train_predict))
+        val_errors.append(metrics.mean_squared_error(y_val, y_val_predict))
+    plt.plot(np.sqrt(train_errors), "r-+", linewidth=2, label='train')
+    plt.plot(np.sqrt(val_errors), "b-", linewidth=3, label='val')
+    plt.xlabel('Training set size')
+    plt.ylabel('RMSE')
+    plt.legend()
+    plt.title(title)
 
 
 # Source https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
 def plot_learning_curve(estimator, title, X, y, axes=None, ylim=None, cv=None,
-                      n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
-  """
+                        n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
+    """
   Generate 3 plots: the test and training learning curve, the training
   samples vs fit times curve, the fit times vs score curve.
 
@@ -101,60 +101,60 @@ def plot_learning_curve(estimator, title, X, y, axes=None, ylim=None, cv=None,
       to be big enough to contain at least one sample from each class.
       (default: np.linspace(0.1, 1.0, 5))
   """
-  y = np.ravel(y)
-  if axes is None:
-      _, axes = plt.subplots(1, 3, figsize=(20, 5))
+    y = np.ravel(y)
+    if axes is None:
+        _, axes = plt.subplots(1, 3, figsize=(20, 5))
 
-  axes[0].set_title(title)
-  if ylim is not None:
-      axes[0].set_ylim(*ylim)
-  axes[0].set_xlabel("Training examples")
-  axes[0].set_ylabel("Score")
+    axes[0].set_title(title)
+    if ylim is not None:
+        axes[0].set_ylim(*ylim)
+    axes[0].set_xlabel("Training examples")
+    axes[0].set_ylabel("Score")
 
-  train_sizes, train_scores, test_scores, fit_times, _ = \
-      learning_curve(estimator, X, y, cv=cv, n_jobs=n_jobs,
-                     train_sizes=train_sizes,
-                     return_times=True)
-  train_scores_mean = np.mean(train_scores, axis=1)
-  train_scores_std = np.std(train_scores, axis=1)
-  test_scores_mean = np.mean(test_scores, axis=1)
-  test_scores_std = np.std(test_scores, axis=1)
-  fit_times_mean = np.mean(fit_times, axis=1)
-  fit_times_std = np.std(fit_times, axis=1)
+    train_sizes, train_scores, test_scores, fit_times, _ = \
+        learning_curve(estimator, X, y, cv=cv, n_jobs=n_jobs,
+                       train_sizes=train_sizes,
+                       return_times=True)
+    train_scores_mean = np.mean(train_scores, axis=1)
+    train_scores_std = np.std(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    test_scores_std = np.std(test_scores, axis=1)
+    fit_times_mean = np.mean(fit_times, axis=1)
+    fit_times_std = np.std(fit_times, axis=1)
 
-  # Plot learning curve
-  axes[0].grid()
-  axes[0].fill_between(train_sizes, train_scores_mean - train_scores_std,
-                       train_scores_mean + train_scores_std, alpha=0.1,
-                       color="r")
-  axes[0].fill_between(train_sizes, test_scores_mean - test_scores_std,
-                       test_scores_mean + test_scores_std, alpha=0.1,
-                       color="g")
-  axes[0].plot(train_sizes, train_scores_mean, 'o-', color="r",
-               label="Training score")
-  axes[0].plot(train_sizes, test_scores_mean, 'o-', color="g",
-               label="Cross-validation score")
-  axes[0].legend(loc="best")
+    # Plot learning curve
+    axes[0].grid()
+    axes[0].fill_between(train_sizes, train_scores_mean - train_scores_std,
+                         train_scores_mean + train_scores_std, alpha=0.1,
+                         color="r")
+    axes[0].fill_between(train_sizes, test_scores_mean - test_scores_std,
+                         test_scores_mean + test_scores_std, alpha=0.1,
+                         color="g")
+    axes[0].plot(train_sizes, train_scores_mean, 'o-', color="r",
+                 label="Training score")
+    axes[0].plot(train_sizes, test_scores_mean, 'o-', color="g",
+                 label="Cross-validation score")
+    axes[0].legend(loc="best")
 
-  # Plot n_samples vs fit_times
-  axes[1].grid()
-  axes[1].plot(train_sizes, fit_times_mean, 'o-')
-  axes[1].fill_between(train_sizes, fit_times_mean - fit_times_std,
-                       fit_times_mean + fit_times_std, alpha=0.1)
-  axes[1].set_xlabel("Training examples")
-  axes[1].set_ylabel("fit_times")
-  axes[1].set_title("Scalability of the model")
+    # Plot n_samples vs fit_times
+    axes[1].grid()
+    axes[1].plot(train_sizes, fit_times_mean, 'o-')
+    axes[1].fill_between(train_sizes, fit_times_mean - fit_times_std,
+                         fit_times_mean + fit_times_std, alpha=0.1)
+    axes[1].set_xlabel("Training examples")
+    axes[1].set_ylabel("fit_times")
+    axes[1].set_title("Scalability of the model")
 
-  # Plot fit_time vs score
-  axes[2].grid()
-  axes[2].plot(fit_times_mean, test_scores_mean, 'o-')
-  axes[2].fill_between(fit_times_mean, test_scores_mean - test_scores_std,
-                       test_scores_mean + test_scores_std, alpha=0.1)
-  axes[2].set_xlabel("fit_times")
-  axes[2].set_ylabel("Score")
-  axes[2].set_title("Performance of the model")
+    # Plot fit_time vs score
+    axes[2].grid()
+    axes[2].plot(fit_times_mean, test_scores_mean, 'o-')
+    axes[2].fill_between(fit_times_mean, test_scores_mean - test_scores_std,
+                         test_scores_mean + test_scores_std, alpha=0.1)
+    axes[2].set_xlabel("fit_times")
+    axes[2].set_ylabel("Score")
+    axes[2].set_title("Performance of the model")
 
-  return plt
+    return plt
 
 
 def extractData():
@@ -184,7 +184,6 @@ def extractData():
     return X, y
 
 
-
 def extractAllData():
     # Load all data from csv files into pandas
     covid = pd.read_csv('DataFiles\Covid-60weeks.csv')[['iso_code', 'W60_new_deaths_per_million']]
@@ -199,7 +198,7 @@ def extractAllData():
     merged = reduce(lambda left, right: pd.merge(left, right, on='Country Code'), dataframe_list)
     merged = pd.merge(merged, covid, left_on='Country Code', right_on='iso_code')
 
-    #TODO this gets rid of any values that have 0 in the y column
+    # TODO this gets rid of any values that have 0 in the y column
     merged = merged.loc[~(merged['W60_new_deaths_per_million'] == 0)]
 
     y = merged[['W60_new_deaths_per_million']]
@@ -212,9 +211,9 @@ def extractAllData():
     return X, y
 
 
-def trainModel(model, model_name, params, data):
+# Uses GridhSearch to find the best parameters then plots the learning curve
+def bestModel(model, model_name, params, X, y, cv=None):
     print('Training ' + model_name + '...')
-    X, y = data
 
     gs = GridSearchCV(model, params, cv=cv, scoring='r2', return_train_score=True)
     gs.fit(X, y)
@@ -223,6 +222,20 @@ def trainModel(model, model_name, params, data):
     print(title)
     plot_learning_curve(gs.best_estimator_, title, X, y)
 
+    return gs
 
 
-
+# Finds the top features when given results from gridSearch on random forest and Plots the top features
+def topFeatures(model, data, num_features=10):
+    X, y = data
+    title = 'Top ' + str(num_features) + ' Features'
+    feature_imp = pd.Series(model.best_estimator_.feature_importances_, index=list(X)).sort_values(ascending=False)
+    sn.barplot(x=feature_imp[:num_features], y=feature_imp[:num_features].index)
+    plt.title(title)
+    plt.tight_layout()
+    print()
+    print(title)
+    print(feature_imp[:10])
+    print()
+    plt.show()
+    return feature_imp

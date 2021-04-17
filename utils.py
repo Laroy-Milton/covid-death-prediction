@@ -8,7 +8,7 @@ from functools import reduce
 from sklearn import metrics
 from sklearn.model_selection import learning_curve, train_test_split
 from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import PowerTransformer, QuantileTransformer
+from sklearn.preprocessing import PowerTransformer, QuantileTransformer, MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 
 
@@ -180,6 +180,9 @@ def extractData():
     merged = pd.merge(merged, covid, left_on='Country Code', right_on='iso_code')
     # print(merged)
 
+    # this gets rid of any values that have 0 and replaces it with the column mean
+    merged.replace(0, merged.mean(axis=0), inplace=True)
+
     y = merged[['W60_new_deaths_per_million']]
     X = merged.drop(['Country Code', 'iso_code', 'W60_new_deaths_per_million'], axis=1)
 
@@ -200,8 +203,9 @@ def extractAllData():
     merged = reduce(lambda left, right: pd.merge(left, right, on='Country Code'), dataframe_list)
     merged = pd.merge(merged, covid, left_on='Country Code', right_on='iso_code')
 
-    # TODO this gets rid of any values that have 0 in the y column
-    merged = merged.loc[~(merged['W60_new_deaths_per_million'] == 0)]
+    # this gets rid of any values that have 0 and replaces it with the column mean
+    merged.replace(0, merged.mean(axis=0), inplace=True)
+
 
     y = merged[['W60_new_deaths_per_million']]
     cols = [c for c in merged.columns if c.lower()[:4] != 'coun']
@@ -220,15 +224,20 @@ def bestModel(model, model_name, params, X, y, cv=None):
     # yj = PowerTransformer(method='yeo-johnson', standardize=True)
     # X = yj.fit_transform(X)
 
-    qt = QuantileTransformer(n_quantiles=len(X.index), output_distribution='normal')
-    X = qt.fit_transform(X)
+    # qt = QuantileTransformer(n_quantiles=len(X.index), output_distribution='normal')
+    # X = qt.fit_transform(X)
+
+    qtu = QuantileTransformer(n_quantiles=len(X.index) - 30, output_distribution='uniform')
+    X = qtu.fit_transform(X)
+
+    # X = MinMaxScaler().fit_transform(X)
 
     gs = GridSearchCV(model, params, cv=cv, scoring='r2', return_train_score=True)
     gs.fit(X, y)
 
     title = '{} {:.2}'.format(model_name, gs.best_score_)
     print(title)
-    print()
+    print(gs.best_params_)
     plot = plot_learning_curve(gs.best_estimator_, title, X, y)
     plot.show()
 

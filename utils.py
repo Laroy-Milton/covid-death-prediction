@@ -10,7 +10,7 @@ from sklearn.preprocessing import MinMaxScaler, PowerTransformer, QuantileTransf
 from sklearn.metrics import make_scorer, mean_squared_error, r2_score
 
 # When SAVE = True, plot's are saved instead of shown
-SAVE = False
+SAVE = True
 seed = 1972
 
 # if set to -1 it will use all processors

@@ -11,7 +11,7 @@ from sklearn.preprocessing import MinMaxScaler, PowerTransformer, QuantileTransf
 from sklearn.metrics import make_scorer, mean_squared_error, r2_score
 
 # When SAVE = True, plot's are saved instead of shown
-SAVE = False
+SAVE = True
 seed = 1972
 np.random.seed(seed)
 
@@ -67,36 +67,7 @@ def plotData(X):
         plt.savefig(save_name + ".png") if SAVE else plt.show()
 
 
-def extractData():
-    # Load all csv files into pandas
-    covid = pd.read_csv('DataFiles\Covid-60weeks.csv')[['iso_code', 'W60_new_deaths_per_million']]
-    demographics = pd.read_csv('DataFiles\Demographics.csv')[
-        ['Country Code', 'Population density (people per sq. km of land area) ', 'Population, total']]
-    economics = pd.read_csv('DataFiles\Economics.csv')[['Country Code', 'Current health expenditure (% of GDP)']]
-    fitness = pd.read_csv('DataFiles\Fitness.csv')[['Country Code', 'Life expectancy at birth']]
-    health = pd.read_csv('DataFiles\Health.csv')[
-        ['Country Code', 'Physicians (per 1,000 people)', 'Nurses and midwives (per 1,000 people)']]
-    sanitation = pd.read_csv('DataFiles\Sanitation.csv')
-    tourism = pd.read_csv('DataFiles\Tourism.csv')[
-        ['Country Code', 'International tourism, number of arrivals', 'Net migration']]
-
-    # Merge everything needed except covid for now because it is the only table with a different column name
-    # The biggest drop in the amount of data comes from sanitation, and only a slight drop is found in tourism.
-    # The rest of the datasets remove around 2 to 3 countries.,
-    dataframe_list = [demographics, economics, fitness, health, tourism]
-    merged = reduce(lambda left, right: pd.merge(left, right, on='Country Code'), dataframe_list)
-    merged = pd.merge(merged, covid, left_on='Country Code', right_on='iso_code')
-
-    # this gets rid of any values that have 0 and replaces it with the column mean
-    merged.replace(0, merged.median(axis=0), inplace=True)
-
-    y = merged[['W60_new_deaths_per_million']]
-    X = merged.drop(['Country Code', 'iso_code', 'W60_new_deaths_per_million'], axis=1)
-
-    return X, y
-
-
-def extractData1(X):
+def extractDataSpec(X):
     return X[['Population density (people per sq. km of land area) ', 'Population, total',
               'Current health expenditure (% of GDP)',
               'Life expectancy at birth',

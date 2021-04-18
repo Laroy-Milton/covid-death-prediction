@@ -60,76 +60,62 @@ def main():
 
         # ---------------------------------------------------------
         # Data Vis
-        X_All, y = extractAllData(save=True)
-        plotData(X_All)
+        X_all, y = extractAllData(save=True)
+        y = np.ravel(y)
+        plotData(X_all)
 
-        X1 = extractData1(X_All)
+        X_spec = extractDataSpec(X_all)
 
         # ---------------------------------------------------------
         # Random Forest Regression Specific
         model_name = 'Random Forest Regression All'
         model = RandomForestRegressor()
 
-        X, y = extractAllData()
+        X_train, X_test, y_train, y_test = train_test_split(X_all, y, test_size=0.30, random_state=seed)
 
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
-
-        bm = bestModel(model, model_name, RFR_parameters, X_train, X_test, np.ravel(y_train), np.ravel(y_test), file, seed)
+        bm = bestModel(model, model_name, RFR_parameters, X_train, X_test, y_train, y_test, file, seed)
         feature_imp = topFeatures(bm, (X_train, y_train), file, num_features=10)
+
+        X_feat = X_all[feature_imp[:10].index]
 
         # ---------------------------------------------------------
         # Random Forest Regression Specific
         model_name = 'Random Forest Regression specific'
         model = RandomForestRegressor()
 
-        # X, y = extractData()
-        X = X1
-
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
-
-        bestModel(model, model_name, RFR_parameters, X_train, X_test, np.ravel(y_train), np.ravel(y_test), file, seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_spec, y, test_size=0.30, random_state=seed)
+        bestModel(model, model_name, RFR_parameters, X_train, X_test, y_train, y_test, file, seed)
 
         # ---------------------------------------------------------
         # Random Forest Regression Top
         model_name = 'Random Forest Regression Top'
         model = RandomForestRegressor()
 
-        X, y = extractAllData()
-
-        y = np.ravel(y)
-        X = X[feature_imp[:10].index]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_feat, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, RFR_parameters, X_train, X_test, y_train, y_test, file, seed)
 
         # ---------------------------------------------------------
         # SVR ALL
         model_name = 'SVR All'
         model = SVR()
-        X, y = extractAllData()
-
-        y = np.ravel(y)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+        
+        X_train, X_test, y_train, y_test = train_test_split(X_all, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, SVR_parameters, X_train, X_test, y_train, y_test, file, seed)
 
         # ---------------------------------------------------------
         # SVR Specific
         model_name = 'SVR Specific'
         model = SVR()
-        X, y = extractData()
 
-        y = np.ravel(y)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_spec, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, SVR_parameters, X_train, X_test, y_train, y_test, file, seed)
 
         # ---------------------------------------------------------
         # SVR ALL
         model_name = 'SVR Top'
         model = SVR()
-        X, y = extractAllData()
 
-        y = np.ravel(y)
-        X = X[feature_imp[:10].index]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_feat, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, SVR_parameters, X_train, X_test, y_train, y_test, file, seed)
 
 
@@ -138,30 +124,24 @@ def main():
         # Ridge Regression ALL
         model_name = 'Ridge Regression ALL'
         model = Ridge()
-        X, y = extractAllData()
 
-        y = np.ravel(y)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_all, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, ridge_parameters, X_train, X_test, y_train, y_test, file, seed)
 
         # ---------------------------------------------------------
         # Ridge regression Specific
         model_name = 'Ridge regression Specific'
         model = Ridge()
-        X, y = extractData()
 
-        y = np.ravel(y)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_spec, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, ridge_parameters, X_train, X_test, y_train, y_test, file, seed)
 
         # ---------------------------------------------------------
         # Ridge regression Top 10 Feature importance
         model_name = 'Ridge Regression Top 10'
         model = Ridge()
-        X, y = extractAllData()
 
-        X = X[feature_imp[:10].index]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_feat, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, ridge_parameters, X_train, X_test, y_train, y_test, file, seed)
 
         file.flush()
@@ -169,32 +149,24 @@ def main():
         # Decision tree Regression All
         model_name = 'Decision Tree Regressor All'
         model = DecisionTreeRegressor()
-        X, y = extractAllData()
 
-        y = np.ravel(y)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_all, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, DTR_parameters, X_train, X_test, y_train, y_test, file, seed)
 
         # ---------------------------------------------------------
         # Decision tree Regression Specific
         model_name = 'Decision Tree Regressor Specific'
         model = DecisionTreeRegressor()
-        X, y = extractData()
 
-        y = np.ravel(y)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_spec, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, DTR_parameters, X_train, X_test, y_train, y_test, file, seed)
 
         # ---------------------------------------------------------
         # Decision tree Regression Top 10 Feature importance
         model_name = 'Decision Tree Regressor Top 10'
         model = DecisionTreeRegressor()
-        X, y = extractAllData()
 
-        y = np.ravel(y)
-
-        X = X[feature_imp[:10].index]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_feat, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, DTR_parameters, X_train, X_test, y_train, y_test, file, seed)
 
         file.flush()
@@ -202,33 +174,25 @@ def main():
         # Gaussian Process Regressor All
         model_name = 'Gaussian Process Regressor All'
         model = GaussianProcessRegressor()
-        X, y = extractAllData()
 
-        y = np.ravel(y)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_all, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, GPR_parameters, X_train, X_test, y_train, y_test, file, seed)
 
         # ---------------------------------------------------------
         # Gaussian Process Regressor Specific
         model_name = 'Gaussian Process Regressor Specific'
         model = GaussianProcessRegressor()
-        X, y = extractData()
 
-        y = np.ravel(y)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_spec, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, GPR_parameters, X_train, X_test, y_train, y_test, file, seed)
 
         # ---------------------------------------------------------
         # Gaussian Process Regressor Top
         model_name = 'Gaussian Process Regressor Top 10'
         model = GaussianProcessRegressor()
-        X, y = extractAllData()
 
-        y = np.ravel(y)
-        X = X[feature_imp[:10].index]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_feat, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, GPR_parameters, X_train, X_test, y_train, y_test, file, seed)
-
 
 
         file.flush()
@@ -236,32 +200,25 @@ def main():
         # Gradient Boosting Regressor All
         model_name = 'Gradient Boosting Regressor All'
         model = GradientBoostingRegressor()
-        X, y = extractAllData()
 
-        y = np.ravel(y)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
-        bestModel(model, model_name, GBR_parameters, X_train, X_test, np.ravel(y_train), np.ravel(y_test), file, seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_feat, y, test_size=0.30, random_state=seed)
+        bestModel(model, model_name, GBR_parameters, X_train, X_test, y_train, y_test, file, seed)
         
         # ---------------------------------------------------------
         # Gradient Boosting Regressor Specific
         model_name = 'Gradient Boosting Regressor Specific'
         model = GradientBoostingRegressor()
-        X, y = extractData()
-        
-        y = np.ravel(y)
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
-        bestModel(model, model_name, GBR_parameters, X_train, X_test, np.ravel(y_train), np.ravel(y_test), file, seed)
+
+        X_train, X_test, y_train, y_test = train_test_split(X_spec, y, test_size=0.30, random_state=seed)
+        bestModel(model, model_name, GBR_parameters, X_train, X_test, y_train, y_test, file, seed)
 
         # ---------------------------------------------------------
         # Gradient Boosting Regressor Top
         model_name = 'Gradient Boosting Regressor Specific'
         model = GradientBoostingRegressor()
-        X, y = extractAllData()
 
-        y = np.ravel(y)
-        X = X[feature_imp[:10].index]
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
-        bestModel(model, model_name, GBR_parameters, X_train, X_test, np.ravel(y_train), np.ravel(y_test), file, seed)
+        X_train, X_test, y_train, y_test = train_test_split(X_feat, y, test_size=0.30, random_state=seed)
+        bestModel(model, model_name, GBR_parameters, X_train, X_test, y_train, y_test, file, seed)
 
 
 main()

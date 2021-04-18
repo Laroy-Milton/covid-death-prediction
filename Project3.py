@@ -6,6 +6,10 @@ from sklearn.svm import SVR
 from sklearn.tree import DecisionTreeRegressor
 from utils import *
 
+# These are defined in utils.py
+# SAVE = True   # When SAVE = True, plot's are saved instead of shown
+# seed = 1972
+# n_jobs = 2    # if set to -1 it will use all processors
 
 def main():
     with open("Output.txt", 'w') as file:
@@ -16,7 +20,7 @@ def main():
                           'min_samples_leaf': [6, 7, 9],
                           'max_features': ['auto', 'sqrt', 'log2'],
                           'bootstrap': [True, False],
-                          'n_jobs': [-1],
+                          'n_jobs': [n_jobs],
                           'random_state': [seed]}
 
         SVR_parameters = {'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],

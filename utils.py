@@ -7,17 +7,20 @@ from functools import reduce
 
 from sklearn.model_selection import learning_curve, RepeatedKFold, RandomizedSearchCV
 from sklearn.preprocessing import MinMaxScaler, PowerTransformer, QuantileTransformer, StandardScaler
-
 from sklearn.metrics import make_scorer, mean_squared_error, r2_score
 
 # When SAVE = True, plot's are saved instead of shown
-SAVE = True
+SAVE = False
 seed = 1972
+
+# if set to -1 it will use all processors
+n_jobs = 2
+
 np.random.seed(seed)
 
 
 # Source https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
-def plot_learning_curve(estimator, title, X, y, seed, cv=None, n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
+def plot_learning_curve(estimator, title, X, y, seed, cv=None, train_sizes=np.linspace(.1, 1.0, 5)):
     _, axes = plt.subplots(1, 1)
 
     axes.set_title(title)
@@ -26,9 +29,7 @@ def plot_learning_curve(estimator, title, X, y, seed, cv=None, n_jobs=None, trai
     axes.set_ylabel("Score")
 
     train_sizes, train_scores, test_scores, fit_times, _ = \
-        learning_curve(estimator, X, y, cv=cv, n_jobs=n_jobs,
-                       train_sizes=train_sizes,
-                       return_times=True, random_state=seed)
+        learning_curve(estimator, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes, return_times=True, random_state=seed)
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
     test_scores_mean = np.mean(test_scores, axis=1)
@@ -122,9 +123,9 @@ def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file,
     X_train = minMax.fit_transform(X_train)
     X_test = minMax.transform(X_test)
 
-    cv = RepeatedKFold(n_splits=5, n_repeats=10)
+    cv = RepeatedKFold(n_splits=10, n_repeats=100)
 
-    gs = RandomizedSearchCV(model, params, n_iter=75, cv=cv, n_jobs=-1, return_train_score=True)
+    gs = RandomizedSearchCV(model, params, n_iter=75, cv=cv, n_jobs=n_jobs, return_train_score=True)
     gs.fit(X_train, y_train)
 
     trainScore = gs.best_score_
@@ -136,7 +137,7 @@ def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file,
     file.write("\n" + title)
     file.write("\n" + str(gs.best_params_))
 
-    plot = plot_learning_curve(gs.best_estimator_, title, X_train, y_train, cv=cv, n_jobs=-1, seed=seed)
+    plot = plot_learning_curve(gs.best_estimator_, title, X_train, y_train, cv=cv, seed=seed)
 
     save_name = model_name.replace(' ', '_').strip()
     plot.savefig(save_name + ".png") if SAVE else plot.show()

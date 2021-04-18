@@ -13,6 +13,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import make_scorer, mean_squared_error, mean_absolute_error, r2_score
 
 
+
+
 # TODO throw away
 def plotLearningCurve(gs, title):
     test_scores = gs.cv_results_['mean_test_score']
@@ -219,8 +221,9 @@ def extractAllData():
 
 
 # Uses GridhSearch to find the best parameters then plots the learning curve
-def bestModel(model, model_name, params, X_train, X_test, y_train, y_test):
+def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file):
     print('\nTraining ' + model_name + '...')
+    file.write('\nTraining ' + model_name + '...')
     # score = 'R2'
     # scorers = {'RMSE': make_scorer(mean_squared_error, greater_is_better=False),
     #            'MAE': make_scorer(mean_absolute_error, greater_is_better=False),
@@ -230,15 +233,20 @@ def bestModel(model, model_name, params, X_train, X_test, y_train, y_test):
     # yj = PowerTransformer(method='yeo-johnson', standardize=True)
     # X = yj.fit_transform(X)
 
-    # qt = QuantileTransformer(n_quantiles=len(X.index), output_distribution='normal')
-    # X = qt.fit_transform(X)
+    # qt = QuantileTransformer(n_quantiles=int(len(X_train.index)*0.5), output_distribution='normal')
+    # X_train = qt.fit_transform(X_train)
+    # X_test = qt.transform(X_test)
 
-    qtu = QuantileTransformer(n_quantiles=len(X_train.index) - 30, output_distribution='uniform')
-    X = qtu.fit_transform(X_train)
+    # qtu = QuantileTransformer(n_quantiles=len(X_train.index) - 30, output_distribution='uniform')
+    # X = qtu.fit_transform(X_train)
 
-    # X = MinMaxScaler().fit_transform(X)
+
+    minMax = MinMaxScaler().fit(X_train)
+    X_train = minMax.transform(X_train)
+    X_test = minMax.transform(X_test)
+
     cv = RepeatedKFold(n_splits=5, n_repeats=10)
-    gs = GridSearchCV(model, params, cv=cv, scoring='r2', return_train_score=True)
+    gs = GridSearchCV(model, params, cv=cv, n_jobs=-1,  scoring='r2', return_train_score=True)
     gs.fit(X_train, y_train)
 
     trainScore = gs.best_score_
@@ -247,23 +255,29 @@ def bestModel(model, model_name, params, X_train, X_test, y_train, y_test):
     title = '{} {:.2}/{:.2}'.format(model_name, trainScore, testScore)
     print(title)
     print(gs.best_params_)
+    file.write("\n" + title)
+    file.write("\n" + str(gs.best_params_))
 
-    plot = plot_learning_curve(gs.best_estimator_, title, X_train, y_train)
+    plot = plot_learning_curve(gs.best_estimator_, title, X_train, y_train, cv=cv)
     plot.show()
 
     pred = gs.predict(X_test)
 
     print("TRAIN", trainScore)
     print('TEST', testScore)
+    file.write("\nTRAIN " + str(trainScore))
+    file.write('\nTEST ' + str(testScore))
 
     print('RMSE score on test:', np.sqrt(mean_squared_error(y_test, pred)))
     print('r2 score on test:', r2_score(y_test, pred))
+    file.write('\nRMSE score on test: ' + str(np.sqrt(mean_squared_error(y_test, pred))))
+    file.write('\nr2 score on test: ' + str(r2_score(y_test, pred)) + '\n')
 
     return gs
 
 
 # Finds the top features when given results from gridSearch on random forest and Plots the top features
-def topFeatures(model, data, num_features=10):
+def topFeatures(model, data, file, num_features=10):
     X, y = data
     title = 'Top ' + str(num_features) + ' Features'
     feature_imp = pd.Series(model.best_estimator_.feature_importances_, index=list(X)).sort_values(ascending=False)
@@ -274,6 +288,9 @@ def topFeatures(model, data, num_features=10):
     print(title)
     print(feature_imp[:10])
     print()
+    file.write("\n\n" + title + "\n")
+    file.writelines(str(feature_imp[:10]))
+
     plt.show()
     return feature_imp
 

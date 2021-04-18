@@ -6,10 +6,11 @@ import seaborn as sn
 from functools import reduce
 
 from sklearn import metrics
-from sklearn.model_selection import learning_curve, train_test_split
+from sklearn.model_selection import learning_curve, train_test_split, RepeatedKFold
 from sklearn.model_selection import GridSearchCV
 from sklearn.preprocessing import PowerTransformer, QuantileTransformer, MinMaxScaler
 from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import make_scorer, mean_squared_error, mean_absolute_error, r2_score
 
 
 # TODO throw away
@@ -218,8 +219,13 @@ def extractAllData():
 
 
 # Uses GridhSearch to find the best parameters then plots the learning curve
-def bestModel(model, model_name, params, X, y, cv=None):
+def bestModel(model, model_name, params, X_train, X_test, y_train, y_test):
     print('\nTraining ' + model_name + '...')
+    # score = 'R2'
+    # scorers = {'RMSE': make_scorer(mean_squared_error, greater_is_better=False),
+    #            'MAE': make_scorer(mean_absolute_error, greater_is_better=False),
+    #            'R2': make_scorer(r2_score)}
+    RMSE = make_scorer(mean_squared_error, greater_is_better=False)
 
     # yj = PowerTransformer(method='yeo-johnson', standardize=True)
     # X = yj.fit_transform(X)
@@ -227,19 +233,31 @@ def bestModel(model, model_name, params, X, y, cv=None):
     # qt = QuantileTransformer(n_quantiles=len(X.index), output_distribution='normal')
     # X = qt.fit_transform(X)
 
-    qtu = QuantileTransformer(n_quantiles=len(X.index) - 30, output_distribution='uniform')
-    X = qtu.fit_transform(X)
+    qtu = QuantileTransformer(n_quantiles=len(X_train.index) - 30, output_distribution='uniform')
+    X = qtu.fit_transform(X_train)
 
     # X = MinMaxScaler().fit_transform(X)
-
+    cv = RepeatedKFold(n_splits=5, n_repeats=10)
     gs = GridSearchCV(model, params, cv=cv, scoring='r2', return_train_score=True)
-    gs.fit(X, y)
+    gs.fit(X_train, y_train)
 
-    title = '{} {:.2}'.format(model_name, gs.best_score_)
+    trainScore = gs.best_score_
+    testScore = gs.score(X_test, y_test)
+
+    title = '{} {:.2}/{:.2}'.format(model_name, trainScore, testScore)
     print(title)
     print(gs.best_params_)
-    plot = plot_learning_curve(gs.best_estimator_, title, X, y)
+
+    plot = plot_learning_curve(gs.best_estimator_, title, X_train, y_train)
     plot.show()
+
+    pred = gs.predict(X_test)
+
+    print("TRAIN", trainScore)
+    print('TEST', testScore)
+
+    print('RMSE score on test:', np.sqrt(mean_squared_error(y_test, pred)))
+    print('r2 score on test:', r2_score(y_test, pred))
 
     return gs
 

@@ -7,7 +7,7 @@ from sklearn.tree import DecisionTreeRegressor
 
 from sklearn.preprocessing import PowerTransformer, MinMaxScaler, RobustScaler, PolynomialFeatures
 from sklearn.preprocessing import QuantileTransformer
-from sklearn.preprocessing import normalize
+
 from sklearn.preprocessing import Normalizer
 from sklearn.preprocessing import FunctionTransformer
 
@@ -127,8 +127,8 @@ def main():
     X, y = extractAllData()
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
 
-    bm = bestModel(model, model_name, RFR_parameters, X_train, X_test, np.ravel(y_train), np.ravel(y_test), cv)
-    feature_imp = topFeatures(bm, (X, y), num_features=10)
+    bm = bestModel(model, model_name, RFR_parameters, X_train, X_test, np.ravel(y_train), np.ravel(y_test))
+    feature_imp = topFeatures(bm, (X_train, y_train), num_features=10)
 
     # # ---------------------------------------------------------
     # # SGD All
@@ -150,29 +150,32 @@ def main():
     # model = SGDRegressor()
     # X, y = extractAllData()
     # X = X[feature_imp[:10].index]
-    # bestModel(model, model_name, sgd_parameters, X, np.ravel(y), cv)
-
-    # ---------------------------------------------------------
-    # Ridge Regression ALL
-    model_name = 'Ridge Regression ALL'
-    model = Ridge()
-    X, y = extractAllData()
-    bestModel(model, model_name, ridge_parameters, X, y, cv)
-
-    # ---------------------------------------------------------
-    # Ridge regression Specific
-    model_name = 'Ridge regression Specific'
-    model = Ridge()
-    X, y = extractData()
-    bestModel(model, model_name, ridge_parameters, X, y, cv)
-
-    # ---------------------------------------------------------
-    # Ridge regression Top 10 Feature importance
-    model_name = 'Ridge Regression Top 10'
-    model = Ridge()
-    X, y = extractAllData()
-    X = X[feature_imp[:10].index]
-    bestModel(model, model_name, ridge_parameters, X, y, cv)
+    # # bestModel(model, model_name, sgd_parameters, X, np.ravel(y), cv)
+    #
+    # # ---------------------------------------------------------
+    # # Ridge Regression ALL
+    # model_name = 'Ridge Regression ALL'
+    # model = Ridge()
+    # X, y = extractAllData()
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+    # bestModel(model, model_name, ridge_parameters, X_train, X_test, y_train, y_test)
+    #
+    # # ---------------------------------------------------------
+    # # Ridge regression Specific
+    # model_name = 'Ridge regression Specific'
+    # model = Ridge()
+    # X, y = extractData()
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+    # bestModel(model, model_name, ridge_parameters, X_train, X_test, y_train, y_test)
+    #
+    # # ---------------------------------------------------------
+    # # Ridge regression Top 10 Feature importance
+    # model_name = 'Ridge Regression Top 10'
+    # model = Ridge()
+    # X, y = extractAllData()
+    # X = X[feature_imp[:10].index]
+    # X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+    # bestModel(model, model_name, ridge_parameters, X_train, X_test, y_train, y_test)
 
     # ---------------------------------------------------------
     # # KNN
@@ -186,14 +189,16 @@ def main():
     model_name = 'Decision Tree Regressor All'
     model = DecisionTreeRegressor()
     X, y = extractAllData()
-    bestModel(model, model_name, DTR_parameters, X, y, cv)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+    bestModel(model, model_name, DTR_parameters, X_train, X_test, y_train, y_test)
 
     # ---------------------------------------------------------
     # Decision tree Regression Specific
     model_name = 'Decision Tree Regressor Specific'
     model = DecisionTreeRegressor()
     X, y = extractData()
-    bestModel(model, model_name, DTR_parameters, X, y, cv)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+    bestModel(model, model_name, DTR_parameters, X_train, X_test, y_train, y_test)
 
     # ---------------------------------------------------------
     # Decision tree Regression Top 10 Feature importance
@@ -201,21 +206,24 @@ def main():
     model = DecisionTreeRegressor()
     X, y = extractAllData()
     X = X[feature_imp[:10].index]
-    bestModel(model, model_name, DTR_parameters, X, y, cv)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+    bestModel(model, model_name, DTR_parameters, X_train, X_test, y_train, y_test)
 
     # ---------------------------------------------------------
     # Gaussian Process Regressor All
     model_name = 'Gaussian Process Regressor All'
     model = GaussianProcessRegressor()
     X, y = extractAllData()
-    bestModel(model, model_name, GPR_parameters, X, y, cv)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+    bestModel(model, model_name, GPR_parameters, X_train, X_test, y_train, y_test)
 
     # ---------------------------------------------------------
     # Gaussian Process Regressor Specific
     model_name = 'Gaussian Process Regressor Specific'
     model = GaussianProcessRegressor()
     X, y = extractData()
-    bestModel(model, model_name, GPR_parameters, X, y, cv)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+    bestModel(model, model_name, GPR_parameters, X_train, X_test, y_train, y_test)
 
     # ---------------------------------------------------------
     # Gaussian Process Regressor Top
@@ -223,14 +231,16 @@ def main():
     model = GaussianProcessRegressor()
     X, y = extractAllData()
     X = X[feature_imp[:10].index]
-    bestModel(model, model_name, GPR_parameters, X, y, cv)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+    bestModel(model, model_name, GPR_parameters, X_train, X_test, y_train, y_test)
 
     # ---------------------------------------------------------
     # Gradient Boosting Regressor All
     model_name = 'Gradient Boosting Regressor All'
     model = GradientBoostingRegressor()
     X, y = extractAllData()
-    bestModel(model, model_name, GBR_parameters, X, np.ravel(y), cv)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30)
+    bestModel(model, model_name, GBR_parameters, X_train, X_test, np.ravel(y_train), np.ravel(y_test))
 
 
 

@@ -5,20 +5,19 @@ import seaborn as sn
 
 from functools import reduce
 
-
 from sklearn.model_selection import learning_curve, RepeatedKFold, RandomizedSearchCV
-from sklearn.model_selection import GridSearchCV
-from sklearn.preprocessing import PowerTransformer, QuantileTransformer, MinMaxScaler
-from sklearn.preprocessing import StandardScaler
-from sklearn.metrics import make_scorer, mean_squared_error, mean_absolute_error, r2_score
+from sklearn.preprocessing import MinMaxScaler, PowerTransformer, QuantileTransformer, StandardScaler
+
+from sklearn.metrics import make_scorer, mean_squared_error, r2_score
+
+# When SAVE = True, plot's are saved instead of shown
+SAVE = False
+seed = 1972
+np.random.seed(seed)
 
 
 # Source https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
-def plot_learning_curve(estimator, title, X, y, seed=None, cv=None,
-                        n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
-
-    # y = np.ravel(y)
-
+def plot_learning_curve(estimator, title, X, y, seed, cv=None, n_jobs=None, train_sizes=np.linspace(.1, 1.0, 5)):
     _, axes = plt.subplots(1, 1)
 
     axes.set_title(title)
@@ -29,7 +28,7 @@ def plot_learning_curve(estimator, title, X, y, seed=None, cv=None,
     train_sizes, train_scores, test_scores, fit_times, _ = \
         learning_curve(estimator, X, y, cv=cv, n_jobs=n_jobs,
                        train_sizes=train_sizes,
-                       return_times=True,random_state=seed)
+                       return_times=True, random_state=seed)
     train_scores_mean = np.mean(train_scores, axis=1)
     train_scores_std = np.std(train_scores, axis=1)
     test_scores_mean = np.mean(test_scores, axis=1)
@@ -38,18 +37,34 @@ def plot_learning_curve(estimator, title, X, y, seed=None, cv=None,
     # Plot learning curve
     axes.grid()
     axes.fill_between(train_sizes, train_scores_mean - train_scores_std,
-                         train_scores_mean + train_scores_std, alpha=0.1,
-                         color="r")
+                      train_scores_mean + train_scores_std, alpha=0.1,
+                      color="r")
     axes.fill_between(train_sizes, test_scores_mean - test_scores_std,
-                         test_scores_mean + test_scores_std, alpha=0.1,
-                         color="g")
+                      test_scores_mean + test_scores_std, alpha=0.1,
+                      color="g")
     axes.plot(train_sizes, train_scores_mean, 'o-', color="r",
-                 label="Training score")
+              label="Training score")
     axes.plot(train_sizes, test_scores_mean, 'o-', color="g",
-                 label="Cross-validation score")
+              label="Cross-validation score")
     axes.legend(loc="best")
 
     return plt
+
+
+def plotData(X):
+    X_trans = {'Raw Data': X,
+               'Standard Scaler': StandardScaler().fit_transform(X),
+               'Min Max': MinMaxScaler().fit_transform(X),
+               'yeo-johnson': PowerTransformer(method='yeo-johnson', standardize=True).fit_transform(X),
+               'Quantile normal': QuantileTransformer(n_quantiles=75, output_distribution='normal').fit_transform(X),
+               'Quantile uniform': QuantileTransformer(n_quantiles=75, output_distribution='uniform').fit_transform(X)}
+
+    for name, x in X_trans.items():
+        plt.hist(x)
+        plt.title(name)
+
+        save_name = name.replace(' ', '_').strip()
+        plt.savefig(save_name + ".png") if SAVE else plt.show()
 
 
 def extractData():
@@ -81,7 +96,16 @@ def extractData():
     return X, y
 
 
-def extractAllData():
+def extractData1(X):
+    return X[['Population density (people per sq. km of land area) ', 'Population, total',
+              'Current health expenditure (% of GDP)',
+              'Life expectancy at birth',
+              'Physicians (per 1,000 people)', 'Nurses and midwives (per 1,000 people)',
+              'International tourism, number of arrivals', 'Net migration']]
+
+
+# If save True then csv for x and y are saved to file
+def extractAllData(save=False):
     # Load all data from csv files into pandas
     covid = pd.read_csv('DataFiles\Covid-60weeks.csv')[['iso_code', 'W60_new_deaths_per_million']]
     demographics = pd.read_csv('DataFiles\Demographics.csv')
@@ -103,31 +127,28 @@ def extractAllData():
     X = merged[cols]
     X = X.drop(['iso_code', 'W60_new_deaths_per_million'], axis=1)
 
-    X.to_csv("X.csv")
-    y.to_csv("y.csv")
+    X.to_csv("X.csv") if save else None
+    y.to_csv("y.csv") if save else None
     return X, y
 
 
 # Uses GridhSearch to find the best parameters then plots the learning curve
 def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file, seed):
-    bestModel.file_num += 1
     print('\nTraining ' + model_name + '...')
     file.write('\nTraining ' + model_name + '...')
 
     RMSE = make_scorer(mean_squared_error, greater_is_better=False)
 
-
     # qt = QuantileTransformer(n_quantiles=75, output_distribution='normal')
     # X_train = qt.fit_transform(X_train)
     # X_test = qt.transform(X_test)
-
 
     # scaler = StandardScaler()
     # X_train = scaler.fit_transform(X_train)
     # X_test = scaler.transform(X_test)
 
-    minMax = MinMaxScaler().fit(X_train)
-    X_train = minMax.transform(X_train)
+    minMax = MinMaxScaler()
+    X_train = minMax.fit_transform(X_train)
     X_test = minMax.transform(X_test)
 
     cv = RepeatedKFold(n_splits=5, n_repeats=10)
@@ -145,8 +166,9 @@ def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file,
     file.write("\n" + str(gs.best_params_))
 
     plot = plot_learning_curve(gs.best_estimator_, title, X_train, y_train, cv=cv, n_jobs=-1, seed=seed)
-    plot.savefig(str(bestModel.file_num) + ".png")
-    plot.show()
+
+    save_name = model_name.replace(' ', '_').strip()
+    plot.savefig(save_name + ".png") if SAVE else plot.show()
 
     pred = gs.predict(X_test)
 
@@ -161,10 +183,6 @@ def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file,
     file.write('\nr2 score on test: ' + str(r2_score(y_test, pred)) + '\n')
 
     return gs
-
-
-# static counter for plot save file
-bestModel.file_num = 0
 
 
 # Finds the top features when given results from gridSearch on random forest and Plots the top features
@@ -182,7 +200,6 @@ def topFeatures(model, data, file, num_features=10):
 
     file.write("\n\n" + title + "\n")
     file.writelines(str(feature_imp[:10]))
-    plt.savefig("Feature_importance.png")
-    plt.show()
-    return feature_imp
+    plt.savefig("Feature_importance.png") if SAVE else plt.show()
 
+    return feature_imp

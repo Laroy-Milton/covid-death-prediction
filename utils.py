@@ -123,7 +123,7 @@ def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file,
     X_train = minMax.fit_transform(X_train)
     X_test = minMax.transform(X_test)
 
-    cv = RepeatedKFold(n_splits=10, n_repeats=100)
+    cv = RepeatedKFold(n_splits=5, n_repeats=10)
 
     gs = RandomizedSearchCV(model, params, n_iter=75, cv=cv, n_jobs=n_jobs, return_train_score=True)
     gs.fit(X_train, y_train)

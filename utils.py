@@ -12,6 +12,14 @@ from sklearn.metrics import mean_squared_error, r2_score
 
 from sys import platform
 
+ # ***IMPORTANT***
+# ---------------------------------------
+# if set to -1 it will use all processors and gain significant speed
+n_jobs = 5
+# ---------------------------------------
+
+
+
 # When SAVE = True, plot's are saved instead of shown
 SAVE = True
 if "win" not in platform: # it's not windows only save the plots
@@ -25,8 +33,7 @@ np.random.seed(seed)
 
 PLOT_FOLDER = "Plots" + OS_Slash
 
-# if set to -1 it will use all processors
-n_jobs = 5
+
 
 
 # Source https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
@@ -185,7 +192,7 @@ def topFeatures(model, data, file, num_features=10):
     feature_imp = pd.Series(model.best_estimator_.feature_importances_, index=list(X)).sort_values(ascending=False)
     sn.barplot(x=feature_imp[:num_features], y=feature_imp[:num_features].index)
     plt.title(title)
-    plt.tight_layout()
+
     print()
     print(title)
     print(feature_imp[:10])

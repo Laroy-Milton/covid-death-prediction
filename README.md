@@ -9,6 +9,9 @@ and then activate the virtual environment.
 Use `deactivate` to exit the active virtual environment if needed.
 
 #### Usage 
++ IMPORTANT
+    - Increase performance time by setting n_jobs = -1 in utils.py. Setting it to -1 will utilize all cpu processors. 
+      Setting n_jobs = 1 will utilize 1 processor. It is currently set to 5
 + Steps to run `Project3.py` are:
     - Ensure `source setup_env.sh` has been run at least once previously
     - Run `source activate_env.sh` to activate the virtual python environment

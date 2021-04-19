@@ -8,7 +8,7 @@ from functools import reduce
 
 from sklearn.model_selection import learning_curve, RepeatedKFold, RandomizedSearchCV
 from sklearn.preprocessing import MinMaxScaler, PowerTransformer, QuantileTransformer, StandardScaler
-from sklearn.metrics import make_scorer, mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score
 
 from sys import platform
 
@@ -26,7 +26,7 @@ np.random.seed(seed)
 PLOT_FOLDER = "Plots" + OS_Slash
 
 # if set to -1 it will use all processors
-n_jobs = 5
+n_jobs = -1
 
 
 # Source https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
@@ -66,7 +66,6 @@ def plotData(X):
     X_trans = {'Raw Data': X,
                'Standard Scaler': StandardScaler().fit_transform(X),
                'Min Max': MinMaxScaler().fit_transform(X),
-               'yeo-johnson': PowerTransformer(method='yeo-johnson', standardize=True).fit_transform(X),
                'Quantile normal': QuantileTransformer(n_quantiles=75, output_distribution='normal').fit_transform(X),
                'Quantile uniform': QuantileTransformer(n_quantiles=75, output_distribution='uniform').fit_transform(X)}
 

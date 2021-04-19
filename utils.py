@@ -13,8 +13,10 @@ from sklearn.metrics import make_scorer, mean_squared_error, r2_score
 SAVE = True
 seed = 1972
 
+PLOT_FOLDER = "Plots\\"
+
 # if set to -1 it will use all processors
-n_jobs = 2
+n_jobs = 5
 
 np.random.seed(seed)
 
@@ -65,7 +67,10 @@ def plotData(X):
         plt.title(name)
 
         save_name = name.replace(' ', '_').strip()
-        plt.savefig(save_name + ".png") if SAVE else plt.show()
+        plt.savefig(PLOT_FOLDER + save_name + ".png") if SAVE else plt.show()
+        plt.clf()
+        plt.cla()
+        plt.close()
 
 
 def extractDataSpec(X):
@@ -79,13 +84,13 @@ def extractDataSpec(X):
 # If save True then csv for x and y are saved to file
 def extractAllData(save=False):
     # Load all data from csv files into pandas
-    covid = pd.read_csv('DataFiles\Covid-60weeks.csv')[['iso_code', 'W60_new_deaths_per_million']]
-    demographics = pd.read_csv('DataFiles\Demographics.csv')
-    economics = pd.read_csv('DataFiles\Economics.csv')
-    fitness = pd.read_csv('DataFiles\Fitness.csv')
-    health = pd.read_csv('DataFiles\Health.csv')
-    sanitation = pd.read_csv('DataFiles\Sanitation.csv')
-    tourism = pd.read_csv('DataFiles\Tourism.csv')
+    covid = pd.read_csv('DataFiles/Covid-60weeks.csv')[['iso_code', 'W60_new_deaths_per_million']]
+    demographics = pd.read_csv('DataFiles/Demographics.csv')
+    economics = pd.read_csv('DataFiles/Economics.csv')
+    fitness = pd.read_csv('DataFiles/Fitness.csv')
+    health = pd.read_csv('DataFiles/Health.csv')
+    sanitation = pd.read_csv('DataFiles/Sanitation.csv')
+    tourism = pd.read_csv('DataFiles/Tourism.csv')
 
     dataframe_list = [demographics, economics, fitness, health, tourism]
     merged = reduce(lambda left, right: pd.merge(left, right, on='Country Code'), dataframe_list)
@@ -106,6 +111,7 @@ def extractAllData(save=False):
 
 # Uses GridhSearch to find the best parameters then plots the learning curve
 def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file, seed):
+    bestModel.num += 1
     print('\nTraining ' + model_name + '...')
     file.write('\nTraining ' + model_name + '...')
 
@@ -140,7 +146,10 @@ def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file,
     plot = plot_learning_curve(gs.best_estimator_, title, X_train, y_train, cv=cv, seed=seed)
 
     save_name = model_name.replace(' ', '_').strip()
-    plot.savefig(save_name + ".png") if SAVE else plot.show()
+    plot.savefig(PLOT_FOLDER + save_name + ".png") if SAVE else plot.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
 
     pred = gs.predict(X_test)
 
@@ -155,6 +164,8 @@ def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file,
     file.write('\nr2 score on test: ' + str(r2_score(y_test, pred)) + '\n')
 
     return gs
+
+bestModel.num = 0
 
 
 # Finds the top features when given results from gridSearch on random forest and Plots the top features
@@ -172,6 +183,9 @@ def topFeatures(model, data, file, num_features=10):
 
     file.write("\n\n" + title + "\n")
     file.writelines(str(feature_imp[:10]))
-    plt.savefig("Feature_importance.png") if SAVE else plt.show()
+    plt.savefig(PLOT_FOLDER + "Feature_importance.png") if SAVE else plt.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
 
     return feature_imp

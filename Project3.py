@@ -67,7 +67,7 @@ def main():
         X_all, y = extractAllData(save=True)
         y = np.ravel(y)
         plotData(X_all)
-
+        return
         X_spec = extractDataSpec(X_all)
 
         # ---------------------------------------------------------
@@ -218,7 +218,7 @@ def main():
 
         # ---------------------------------------------------------
         # Gradient Boosting Regressor Top
-        model_name = 'Gradient Boosting Regressor Specific'
+        model_name = 'Gradient Boosting Regressor Top 10'
         model = GradientBoostingRegressor()
 
         X_train, X_test, y_train, y_test = train_test_split(X_feat, y, test_size=0.30, random_state=seed)

@@ -113,8 +113,6 @@ def extractAllData(save=False):
     X = merged[cols]
     X = X.drop(['iso_code', 'W60_new_deaths_per_million'], axis=1)
 
-    X.to_csv("X.csv") if save else None
-    y.to_csv("y.csv") if save else None
     return X, y
 
 

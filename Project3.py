@@ -63,14 +63,6 @@ def main():
                           'max_features': ['auto', 'sqrt', 'log2'],
                           'alpha': [0.001, 0.01, 0.1, 0.99]}
 
-        MLP_parameters = {
-            'hidden_layer_sizes': [(50, 50, 50), (50, 100, 50), (100,), (150,)],
-            'activation': ['tanh', 'relu'],
-            'solver': [ 'adam'],
-            'alpha': [0.0001, 0.05, 0.1, 1.0],
-            'learning_rate': ['constant', 'adaptive'],
-        }
-
 
         # ---------------------------------------------------------
         # Data Vis
@@ -233,31 +225,6 @@ def main():
 
         X_train, X_test, y_train, y_test = train_test_split(X_feat, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, GBR_parameters, X_train, X_test, y_train, y_test, file, seed)
-
-
-        # ---------------------------------------------------------
-        # MLP ALL
-        model_name = 'MLP All'
-        model = MLPRegressor(max_iter=20000)
-
-        X_train, X_test, y_train, y_test = train_test_split(X_all, y, test_size=0.30, random_state=seed)
-        bestModel(model, model_name, MLP_parameters, X_train, X_test, y_train, y_test, file, seed)
-
-        # ---------------------------------------------------------
-        # MLP Specific
-        model_name = 'MLP Specific'
-        model = MLPRegressor(max_iter=20000)
-
-        X_train, X_test, y_train, y_test = train_test_split(X_spec, y, test_size=0.30, random_state=seed)
-        bestModel(model, model_name, MLP_parameters, X_train, X_test, y_train, y_test, file, seed)
-
-        # ---------------------------------------------------------
-        # MLP Top 10
-        model_name = 'MLP Top 10'
-        model = MLPRegressor(max_iter=20000)
-
-        X_train, X_test, y_train, y_test = train_test_split(X_feat, y, test_size=0.30, random_state=seed)
-        bestModel(model, model_name, MLP_parameters, X_train, X_test, y_train, y_test, file, seed)
 
     print("\nFinished: ", (time.time() - start_time))
 

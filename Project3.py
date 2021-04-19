@@ -12,6 +12,7 @@ from utils import *
 # n_jobs = 2    # if set to -1 it will use all processors
 
 def main():
+    start_time = time.time()
     with open("Output.txt", 'w') as file:
         RFR_parameters = {'n_estimators': [25, 40, 50, 60, 70, 80],
                           'criterion': ['mae'],
@@ -223,6 +224,8 @@ def main():
 
         X_train, X_test, y_train, y_test = train_test_split(X_feat, y, test_size=0.30, random_state=seed)
         bestModel(model, model_name, GBR_parameters, X_train, X_test, y_train, y_test, file, seed)
+
+    print("\nFinished: ", (time.time() - start_time))
 
 
 main()

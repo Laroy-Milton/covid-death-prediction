@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sn
+import time
 
 from functools import reduce
 
@@ -9,11 +10,21 @@ from sklearn.model_selection import learning_curve, RepeatedKFold, RandomizedSea
 from sklearn.preprocessing import MinMaxScaler, PowerTransformer, QuantileTransformer, StandardScaler
 from sklearn.metrics import make_scorer, mean_squared_error, r2_score
 
+from sys import platform
+
 # When SAVE = True, plot's are saved instead of shown
-SAVE = True
+SAVE = False
+if "win" not in platform: # it's not windows only save the plots
+    SAVE = True
+    OS_Slash = "/"
+else:
+    OS_Slash = "\\"
+
+
 seed = 1972
 
-PLOT_FOLDER = "Plots\\"
+
+PLOT_FOLDER = "Plots" + OS_Slash
 
 # if set to -1 it will use all processors
 n_jobs = 5
@@ -84,13 +95,13 @@ def extractDataSpec(X):
 # If save True then csv for x and y are saved to file
 def extractAllData(save=False):
     # Load all data from csv files into pandas
-    covid = pd.read_csv('DataFiles/Covid-60weeks.csv')[['iso_code', 'W60_new_deaths_per_million']]
-    demographics = pd.read_csv('DataFiles/Demographics.csv')
-    economics = pd.read_csv('DataFiles/Economics.csv')
-    fitness = pd.read_csv('DataFiles/Fitness.csv')
-    health = pd.read_csv('DataFiles/Health.csv')
-    sanitation = pd.read_csv('DataFiles/Sanitation.csv')
-    tourism = pd.read_csv('DataFiles/Tourism.csv')
+    covid = pd.read_csv('DataFiles' + OS_Slash + 'Covid-60weeks.csv')[['iso_code', 'W60_new_deaths_per_million']]
+    demographics = pd.read_csv('DataFiles' + OS_Slash + 'Demographics.csv')
+    economics = pd.read_csv('DataFiles' + OS_Slash + 'Economics.csv')
+    fitness = pd.read_csv('DataFiles' + OS_Slash + 'Fitness.csv')
+    health = pd.read_csv('DataFiles' + OS_Slash + 'Health.csv')
+    sanitation = pd.read_csv('DataFiles' + OS_Slash + 'Sanitation.csv')
+    tourism = pd.read_csv('DataFiles' + OS_Slash + 'Tourism.csv')
 
     dataframe_list = [demographics, economics, fitness, health, tourism]
     merged = reduce(lambda left, right: pd.merge(left, right, on='Country Code'), dataframe_list)
@@ -111,6 +122,7 @@ def extractAllData(save=False):
 
 # Uses GridhSearch to find the best parameters then plots the learning curve
 def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file, seed):
+    start_time = time.time()
     bestModel.num += 1
     print('\nTraining ' + model_name + '...')
     file.write('\nTraining ' + model_name + '...')
@@ -161,7 +173,11 @@ def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file,
     print('RMSE score on test:', np.sqrt(mean_squared_error(y_test, pred)))
     print('r2 score on test:', r2_score(y_test, pred))
     file.write('\nRMSE score on test: ' + str(np.sqrt(mean_squared_error(y_test, pred))))
-    file.write('\nr2 score on test: ' + str(r2_score(y_test, pred)) + '\n')
+    file.write('\nr2 score on test: ' + str(r2_score(y_test, pred)))
+
+    file.write('\n**Finished: ' + str(time.time() - start_time) + '\n')
+
+    print("**Finished: ", time.time() - start_time)
 
     return gs
 

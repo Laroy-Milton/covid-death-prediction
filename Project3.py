@@ -67,7 +67,7 @@ def main():
         X_all, y = extractAllData(save=True)
         y = np.ravel(y)
         plotData(X_all)
-        return
+
         X_spec = extractDataSpec(X_all)
 
         # ---------------------------------------------------------

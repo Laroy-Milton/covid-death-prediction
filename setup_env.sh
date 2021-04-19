@@ -7,3 +7,4 @@ pip install matplotlib
 pip install pandas
 pip install sklearn
 pip install seaborn
+mkdir Plots

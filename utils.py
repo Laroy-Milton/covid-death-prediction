@@ -20,16 +20,15 @@ if "win" not in platform: # it's not windows only save the plots
 else:
     OS_Slash = "\\"
 
-
 seed = 1972
-
+np.random.seed(seed)
 
 PLOT_FOLDER = "Plots" + OS_Slash
 
 # if set to -1 it will use all processors
-n_jobs = 5
+n_jobs = -1
 
-np.random.seed(seed)
+
 
 
 # Source https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
@@ -95,7 +94,16 @@ def extractDataSpec(X):
 # If save True then csv for x and y are saved to file
 def extractAllData(save=False):
     # Load all data from csv files into pandas
-    covid = pd.read_csv('DataFiles' + OS_Slash + 'Covid-60weeks.csv')[['iso_code', 'W60_new_deaths_per_million']]
+    # covid = pd.read_csv('DataFiles' + OS_Slash + 'Covid-60weeks.csv')[['iso_code', 'W60_new_deaths_per_million']]
+    covid = pd.read_csv('DataFiles' + OS_Slash + 'Covid-60weeks.csv').iloc[:, 2:]
+    covid = covid.loc[:,~covid.columns.str.contains('_new_cases_per_million', case=False)]
+    total = covid.sum(axis=1)
+    total.name = "Total_Deaths"
+
+    covid = covid.iloc[:, 0:2]
+    covid = covid.join(total)
+
+
     demographics = pd.read_csv('DataFiles' + OS_Slash + 'Demographics.csv')
     economics = pd.read_csv('DataFiles' + OS_Slash + 'Economics.csv')
     fitness = pd.read_csv('DataFiles' + OS_Slash + 'Fitness.csv')
@@ -110,10 +118,10 @@ def extractAllData(save=False):
     # this gets rid of any values that have 0 and replaces it with the column mean
     merged.replace(0, merged.median(axis=0), inplace=True)
 
-    y = merged[['W60_new_deaths_per_million']]
+    y = merged[['Total_Deaths']]
     cols = [c for c in merged.columns if c.lower()[:4] != 'coun']
     X = merged[cols]
-    X = X.drop(['iso_code', 'W60_new_deaths_per_million'], axis=1)
+    X = X.drop(['iso_code', 'Total_Deaths'], axis=1)
 
     X.to_csv("X.csv") if save else None
     y.to_csv("y.csv") if save else None
@@ -126,8 +134,6 @@ def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file,
     bestModel.num += 1
     print('\nTraining ' + model_name + '...')
     file.write('\nTraining ' + model_name + '...')
-
-    RMSE = make_scorer(mean_squared_error, greater_is_better=False)
 
     # qt = QuantileTransformer(n_quantiles=75, output_distribution='normal')
     # X_train = qt.fit_transform(X_train)

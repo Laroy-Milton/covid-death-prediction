@@ -66,7 +66,7 @@ def main():
         MLP_parameters = {
             'hidden_layer_sizes': [(50, 50, 50), (50, 100, 50), (100,), (150,)],
             'activation': ['tanh', 'relu'],
-            'solver': ['sgd', 'adam'],
+            'solver': [ 'adam'],
             'alpha': [0.0001, 0.05, 0.1, 1.0],
             'learning_rate': ['constant', 'adaptive'],
         }

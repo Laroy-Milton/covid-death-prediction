@@ -13,7 +13,7 @@ from sklearn.metrics import make_scorer, mean_squared_error, r2_score
 from sys import platform
 
 # When SAVE = True, plot's are saved instead of shown
-SAVE = False
+SAVE = True
 if "win" not in platform: # it's not windows only save the plots
     SAVE = True
     OS_Slash = "/"
@@ -157,7 +157,7 @@ def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file,
 
     plot = plot_learning_curve(gs.best_estimator_, title, X_train, y_train, cv=cv, seed=seed)
 
-    save_name = model_name.replace(' ', '_').strip()
+    save_name = str(bestModel.num) + "_" + model_name.replace(' ', '_').strip()
     plot.savefig(PLOT_FOLDER + save_name + ".png") if SAVE else plot.show()
     plt.clf()
     plt.cla()

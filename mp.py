@@ -1,35 +1,26 @@
-from sklearn.impute import SimpleImputer
-from sklearn.metrics import mean_squared_error
 from sklearn.neural_network import MLPRegressor
 from sklearn.pipeline import Pipeline
-from sklearn.preprocessing import StandardScaler
-import numpy as np
-import matplotlib.pyplot as plt
 from sklearn.model_selection import GridSearchCV
 from sklearn.model_selection import ShuffleSplit
 from sklearn.model_selection import train_test_split
-from utils import extractAllData, extractData, plot_learning_curve
+from utils import *
 
-def run_mlp(X, y):
-    y = np.ravel(y)
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=1)
-
-    pipeline = Pipeline([('imputer', SimpleImputer()), ('scaler', StandardScaler())])
+def run_mlp(X, y, title):
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=seed)
+    pipeline = Pipeline([('scaler', StandardScaler())])
     X_train_scaled = pipeline.fit_transform(X_train)
     X_test_scaled = pipeline.transform(X_test)
 
     # Optimal parameter testing
     mlp = MLPRegressor(max_iter=20000)
-    parameter_space = {
+    MLP_parameters = {
         'hidden_layer_sizes': [(50, 50, 50), (50, 100, 50), (100,)],
         'activation': ['tanh', 'relu'],
         'solver': ['sgd', 'adam'],
         'alpha': [0.0001, 0.05],
         'learning_rate': ['constant', 'adaptive'],
     }
-    params_Ridge = {'alpha': [1, 0.1, 0.01, 0.001, 0.0001, 0], "fit_intercept": [True, False],
-                    "solver": ['svd', 'cholesky', 'lsqr', 'sparse_cg', 'sag', 'saga']}
-    gridsearch = GridSearchCV(mlp, parameter_space, n_jobs=-1, cv=3)
+    gridsearch = GridSearchCV(mlp, MLP_parameters, n_jobs=5, cv=3)
     gridsearch.fit(X_train_scaled, y_train)
     clf = gridsearch.best_estimator_
     print('Best hyperparameters found:\n', gridsearch.best_params_)
@@ -44,13 +35,39 @@ def run_mlp(X, y):
 
     # Learning curve plot
     cv = ShuffleSplit(n_splits=100, test_size=0.3)
-    plot_learning_curve(clf, "MLP", X_train_scaled, y_train, cv=cv, n_jobs=4)
-    plt.show()
+    plot = plot_learning_curve(gridsearch.best_estimator_, title, X_train, y_train, cv=cv, seed=seed)
+    save_name = title.replace(' ', '_').strip()
+    plot.savefig(PLOT_FOLDER + save_name + ".png") if SAVE else plot.show()
+    plt.clf()
+    plt.cla()
+    plt.close()
 
-print("Multi-layer Perceptron Regressor All")
-X,y = extractAllData()
-run_mlp(X, y)
+# X_all, y = extractAllData(save=True)
+# y = np.ravel(y)
+# run_mlp(X_all, y)
 
-print("Multi-layer Perceptron Regressor Specific")
-X,y = extractData()
-run_mlp(X, y)
+X_all, y = extractAllData(save=True)
+y = np.ravel(y)
+
+X_spec = extractDataSpec(X_all)
+
+
+MLP_parameters = {
+        'hidden_layer_sizes': [(50, 50, 50), (50, 100, 50), (100,)],
+        'activation': ['tanh', 'relu'],
+        'solver': ['sgd', 'adam'],
+        'alpha': [0.0001, 0.05],
+        'learning_rate': ['constant', 'adaptive'],
+    }
+
+
+with open("mp_Output.txt", 'w') as file:
+    # Multi-layer Perceptron Regressor All
+    title = "Multi-layer Perceptron Regressor All"
+    print(title)
+    run_mlp(X_all, y, title)
+
+    # Multi-layer Perceptron Regressor All
+    title = "Multi-layer Perceptron Regressor Specific"
+    print(title)
+    run_mlp(X_spec, y, title)

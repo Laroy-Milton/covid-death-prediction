@@ -8,7 +8,7 @@ from functools import reduce
 
 from sklearn.model_selection import learning_curve, RepeatedKFold, RandomizedSearchCV
 from sklearn.preprocessing import MinMaxScaler, PowerTransformer, QuantileTransformer, StandardScaler
-from sklearn.metrics import make_scorer, mean_squared_error, r2_score
+from sklearn.metrics import mean_squared_error, r2_score
 
 from sys import platform
 
@@ -26,7 +26,7 @@ np.random.seed(seed)
 PLOT_FOLDER = "Plots" + OS_Slash
 
 # if set to -1 it will use all processors
-n_jobs = -1
+n_jobs = 5
 
 
 # Source https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
@@ -66,7 +66,6 @@ def plotData(X):
     X_trans = {'Raw Data': X,
                'Standard Scaler': StandardScaler().fit_transform(X),
                'Min Max': MinMaxScaler().fit_transform(X),
-               'yeo-johnson': PowerTransformer(method='yeo-johnson', standardize=True).fit_transform(X),
                'Quantile normal': QuantileTransformer(n_quantiles=75, output_distribution='normal').fit_transform(X),
                'Quantile uniform': QuantileTransformer(n_quantiles=75, output_distribution='uniform').fit_transform(X)}
 
@@ -93,14 +92,6 @@ def extractDataSpec(X):
 def extractAllData(save=False):
     # Load all data from csv files into pandas
     covid = pd.read_csv('DataFiles' + OS_Slash + 'Covid-60weeks.csv')[['iso_code', 'W60_new_deaths_per_million', 'W59_new_deaths_per_million']]
-    # covid = pd.read_csv('DataFiles' + OS_Slash + 'Covid-60weeks.csv').iloc[:, 2:]
-
-    # covid = covid.loc[:,~covid.columns.str.contains('_new_cases_per_million', case=False)]
-    # total = covid.sum(axis=1)
-    # total.name = "Total_Deaths"
-    #
-    # covid = covid.iloc[:, 0:2]
-    # covid = covid.join(total)
 
 
     demographics = pd.read_csv('DataFiles' + OS_Slash + 'Demographics.csv')

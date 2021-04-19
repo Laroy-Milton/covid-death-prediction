@@ -26,7 +26,7 @@ np.random.seed(seed)
 PLOT_FOLDER = "Plots" + OS_Slash
 
 # if set to -1 it will use all processors
-n_jobs = -1
+n_jobs = 5
 
 
 # Source https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
@@ -92,14 +92,6 @@ def extractDataSpec(X):
 def extractAllData(save=False):
     # Load all data from csv files into pandas
     covid = pd.read_csv('DataFiles' + OS_Slash + 'Covid-60weeks.csv')[['iso_code', 'W60_new_deaths_per_million', 'W59_new_deaths_per_million']]
-    # covid = pd.read_csv('DataFiles' + OS_Slash + 'Covid-60weeks.csv').iloc[:, 2:]
-
-    # covid = covid.loc[:,~covid.columns.str.contains('_new_cases_per_million', case=False)]
-    # total = covid.sum(axis=1)
-    # total.name = "Total_Deaths"
-    #
-    # covid = covid.iloc[:, 0:2]
-    # covid = covid.join(total)
 
 
     demographics = pd.read_csv('DataFiles' + OS_Slash + 'Demographics.csv')

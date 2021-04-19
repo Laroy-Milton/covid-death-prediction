@@ -30,9 +30,10 @@ Use `deactivate` to exit the active virtual environment if needed.
 - `Project3.py`: The main project file. Running it will initially create 6 graphs for data visualization. Next it will 
   begin going through each model and its variations of features. It will show the progress by printing the current model
   being trained. Expected run time is around 25 minutes.
+- `utils.py`: Contains the utilities used by the main project python file.  <strong>Important: The global variable
+  n_jobs specifies how many concurrent processes should be used in parallel. if n_jobs is set to -1, all CPUs are used.</strong>
+- `Output.txt`: The stdout of printed messages containing the results of each model.
 - `setup_env.sh`: contains the script to setup and run the virtual python environment needed to install and use the 
   required python packages.
-- `utils.py`: Contains the utilities used by the main project python file.  <strong>Important: The global variable 
-  n_jobs specifies how many concurrent processes should be used in parallel. if n_jobs is set to -1, all CPUs are used.</strong>
 - `activate_env.sh`: Used to activate the existing virtual python environment.
 - `README.md`: This file

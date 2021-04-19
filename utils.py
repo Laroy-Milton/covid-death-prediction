@@ -26,7 +26,7 @@ np.random.seed(seed)
 PLOT_FOLDER = "Plots" + OS_Slash
 
 # if set to -1 it will use all processors
-n_jobs = -1
+n_jobs = 5
 
 
 # Source https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html

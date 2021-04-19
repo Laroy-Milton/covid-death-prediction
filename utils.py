@@ -175,9 +175,9 @@ def bestModel(model, model_name, params, X_train, X_test, y_train, y_test, file,
     file.write('\nRMSE score on test: ' + str(np.sqrt(mean_squared_error(y_test, pred))))
     file.write('\nr2 score on test: ' + str(r2_score(y_test, pred)))
 
-    file.write('\n**Finished: ' + str(time.time() - start_time) + '\n')
+    file.write('\n**Finished: ' + str(time.time() - start_time) + ' Seconds\n')
 
-    print("**Finished: ", time.time() - start_time)
+    print("**Finished: ", time.time() - start_time, "seconds")
 
     return gs
 

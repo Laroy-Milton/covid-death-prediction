@@ -29,8 +29,6 @@ PLOT_FOLDER = "Plots" + OS_Slash
 n_jobs = -1
 
 
-
-
 # Source https://scikit-learn.org/stable/auto_examples/model_selection/plot_learning_curve.html
 def plot_learning_curve(estimator, title, X, y, seed, cv=None, train_sizes=np.linspace(.1, 1.0, 5)):
     _, axes = plt.subplots(1, 1)
@@ -94,14 +92,15 @@ def extractDataSpec(X):
 # If save True then csv for x and y are saved to file
 def extractAllData(save=False):
     # Load all data from csv files into pandas
-    # covid = pd.read_csv('DataFiles' + OS_Slash + 'Covid-60weeks.csv')[['iso_code', 'W60_new_deaths_per_million']]
-    covid = pd.read_csv('DataFiles' + OS_Slash + 'Covid-60weeks.csv').iloc[:, 2:]
-    covid = covid.loc[:,~covid.columns.str.contains('_new_cases_per_million', case=False)]
-    total = covid.sum(axis=1)
-    total.name = "Total_Deaths"
+    covid = pd.read_csv('DataFiles' + OS_Slash + 'Covid-60weeks.csv')[['iso_code', 'W60_new_deaths_per_million', 'W59_new_deaths_per_million']]
+    # covid = pd.read_csv('DataFiles' + OS_Slash + 'Covid-60weeks.csv').iloc[:, 2:]
 
-    covid = covid.iloc[:, 0:2]
-    covid = covid.join(total)
+    # covid = covid.loc[:,~covid.columns.str.contains('_new_cases_per_million', case=False)]
+    # total = covid.sum(axis=1)
+    # total.name = "Total_Deaths"
+    #
+    # covid = covid.iloc[:, 0:2]
+    # covid = covid.join(total)
 
 
     demographics = pd.read_csv('DataFiles' + OS_Slash + 'Demographics.csv')
@@ -118,10 +117,10 @@ def extractAllData(save=False):
     # this gets rid of any values that have 0 and replaces it with the column mean
     merged.replace(0, merged.median(axis=0), inplace=True)
 
-    y = merged[['Total_Deaths']]
+    y = merged[['W60_new_deaths_per_million']]
     cols = [c for c in merged.columns if c.lower()[:4] != 'coun']
     X = merged[cols]
-    X = X.drop(['iso_code', 'Total_Deaths'], axis=1)
+    X = X.drop(['iso_code', 'W60_new_deaths_per_million'], axis=1)
 
     X.to_csv("X.csv") if save else None
     y.to_csv("y.csv") if save else None
